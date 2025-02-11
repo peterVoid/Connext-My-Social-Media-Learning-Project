@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String? // @db.Text
+  access_token             String? // @db.Text
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String? // @db.Text
+  session_state            String?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refresh_token_expires_in Int?
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                     String         @id @default(cuid())
+  firstname              String
+  surname                String?
+  gender                 GENDER
+  username               String         @unique
+  email                  String?        @unique
+  emailVerified          DateTime?
+  hashedPassword         String?
+  image                  String?
+  thumbnailPic           String?
+  bio                    String?
+  accounts               Account[]
+  sessions               Session[]
+  posts                  Post[]
+  userLikes              Like[]
+  userBookmarks          Bookmark[]
+  userRepost             Repost[]
+  userReplies            Reply[]
+  followers              Following[]    @relation("userFollowers")
+  followings             Following[]    @relation("userFollowings")
+  notificationsSender    Notification[] @relation("notificationSender")
+  notificationsRecipient Notification[] @relation("notificationRecipient")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum GENDER {
+  MALE
+  FEMALE
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Post {
+  id                String  @id @default(cuid())
+  statusDescription String?
+  userId            String
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  postMedia    Media[]
+  likes        Like[]
+  bookmarks    Bookmark[]
+  reposts      Repost[]
+  replies      Reply[]
+  Notification Notification[]
+
+  @@map("posts")
+}
+
+model Media {
+  id     String    @id @default(cuid())
+  url    String
+  postId String?
+  post   Post?     @relation(fields: [postId], references: [id], onDelete: SetNull)
+  type   MediaType
+
+  createdAt DateTime @default(now())
+
+  @@map("medias")
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model Like {
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, postId])
+  @@map("likes")
+}
+
+model Bookmark {
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, postId])
+  @@map("bookmarks")
+}
+
+model Repost {
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, postId])
+  @@map("reposts")
+}
+
+model Reply {
+  id           String @id @default(cuid())
+  parentPostId String
+  replyText    String
+  userId       String
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId       String
+  post         Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("replies")
+}
+
+model Following {
+  followerId  String
+  follower    User   @relation("userFollowings", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User   @relation("userFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@map("followings")
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  senderId    String
+  sender      User             @relation("notificationSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   User             @relation("notificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  postId      String
+  post        Post             @relation(fields: [postId], references: [id], onDelete: Cascade)
+  type        NotificationType
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+}
