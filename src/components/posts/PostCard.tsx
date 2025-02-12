@@ -115,13 +115,14 @@ export default function PostCard({
   return (
     <Card className="flex-1 cursor-pointer border-b border-white/20 bg-black text-white shadow-md">
       <CardHeader className="flex flex-row items-center gap-4 p-4">
-        <Image
-          src={post.user.image || avatarPlaceholder}
-          alt={`${post.user.firstname}'s avatar`}
-          width={40}
-          height={40}
-          className="rounded-full border border-gray-700 object-cover"
-        />
+        <div className="relative size-10">
+          <Image
+            src={post.user.image || avatarPlaceholder}
+            alt={`${post.user.firstname}'s avatar`}
+            fill
+            className="rounded-full border border-gray-700 object-cover"
+          />
+        </div>
         <div className="flex-1">
           <div className="flex flex-col">
             <Link

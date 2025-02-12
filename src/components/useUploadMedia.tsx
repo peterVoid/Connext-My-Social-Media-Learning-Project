@@ -48,6 +48,9 @@ export default function useUploadMedia() {
         }),
       );
     },
+    onUploadError: (e) => {
+      setMedias((prev) => prev.filter((item) => item.isUpload === true));
+    },
   });
 
   function start(files: File[]) {

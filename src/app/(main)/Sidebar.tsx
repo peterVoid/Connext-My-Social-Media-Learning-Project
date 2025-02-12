@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent } from "@radix-ui/react-dropdown-menu";
 import LogoutButton from "./LogoutButton";
+import SearchBar from "./SearchBar";
 
 const SIDEBAR_LINKS: { title: string; Icon: LucideIcon; href: string }[] = [
   { title: "Home", Icon: Home, href: "/" },
@@ -33,6 +34,7 @@ export default function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 w-14 border-r border-white/20 px-2 py-9 md:w-56 md:px-5">
       <div className="flex h-full flex-col">
+        <SearchBar />
         <div className="space-y-4">
           {SIDEBAR_LINKS.map((item) => (
             <Link

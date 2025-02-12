@@ -26,6 +26,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { updateProfile } from "./actions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   userData: UserDataServerType;
@@ -58,6 +60,8 @@ export default function EditProfileButton({ userData }: Props) {
 function EditProfileForm({ userData, setOpenDialog }: Props) {
   const [blobImg, setBlobImg] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  const { update } = useSession();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -92,7 +96,12 @@ function EditProfileForm({ userData, setOpenDialog }: Props) {
     onClientUploadComplete(res) {
       form.setValue("image", res[0].url);
     },
+    onUploadError(e) {
+      console.log(e);
+    },
   });
+
+  const { toast } = useToast();
 
   const queryClient = useQueryClient();
 
@@ -101,12 +110,21 @@ function EditProfileForm({ userData, setOpenDialog }: Props) {
       const data = updateProfile(values);
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries();
-      setOpenDialog(false);
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["user", userData.username] });
+      queryClient.invalidateQueries({
+        queryKey: ["f_feed", "user", "post", userData.id],
+      });
+      await update({ image: form.getValues("image") });
+      if (setOpenDialog) {
+        setOpenDialog(false);
+      }
     },
     onError: (error) => {
-      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Error. Please try again.",
+      });
     },
   });
 
@@ -162,6 +180,7 @@ function EditProfileForm({ userData, setOpenDialog }: Props) {
             </FormItem>
           )}
         />
+        <div>{uploadProgress > 0 && <span>{uploadProgress}%</span>}</div>
         <div className="grid w-full grid-cols-2 gap-3">
           <FormField
             control={form.control}
@@ -209,9 +228,13 @@ function EditProfileForm({ userData, setOpenDialog }: Props) {
         <button
           type="submit"
           className="w-fit rounded-full bg-white px-5 py-2 font-bold text-black disabled:bg-white/50"
-          disabled={(uploadProgress > 0 && uploadProgress < 100) || isPending}
+          disabled={
+            (uploadProgress > 0 && uploadProgress < 100) ||
+            isPending ||
+            isUploading
+          }
         >
-          Save
+          {isUploading ? "Loading..." : "Save"}
         </button>
       </form>
     </Form>

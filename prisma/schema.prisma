@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -44,7 +45,6 @@ model User {
   emailVerified          DateTime?
   hashedPassword         String?
   image                  String?
-  thumbnailPic           String?
   bio                    String?
   accounts               Account[]
   sessions               Session[]

@@ -51,7 +51,7 @@ export default function RepostButton({
   return (
     <button
       className="flex cursor-pointer items-center gap-1 text-sm hover:text-green-500"
-      title="Like"
+      title="Repost"
       onClick={(e) => {
         e.stopPropagation();
         mutate();

@@ -63,7 +63,7 @@ export default function UserDetails({ username }: UserDetailsProps) {
         </div>
         {/* Header */}
         <div className="relative">
-          <div className="aspect-video max-h-[200px] w-full bg-muted-foreground" />
+          {/* <div className="aspect-video max-h-[200px] w-full bg-muted-foreground" /> */}
           <div className="space-y-4 p-3">
             <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
               <div className="relative h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 lg:h-20 lg:w-20">

@@ -11,6 +11,7 @@ import LinkifyIt from "../linkify-it";
 import LoadingButton from "../LoadingButton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { replyPostMutate } from "./mutations";
+import { useSession } from "next-auth/react";
 
 interface ReplyButtonProps {
   postData: PostDataServerType;
@@ -52,6 +53,8 @@ interface ReplyDialogProps {
 }
 
 function ReplyDialog({ open, onOpenChange, postData }: ReplyDialogProps) {
+  const { data } = useSession();
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -79,6 +82,10 @@ function ReplyDialog({ open, onOpenChange, postData }: ReplyDialogProps) {
   const handleReplyButton = async () => {
     mutate();
   };
+
+  if (!data?.user) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -129,7 +136,7 @@ function ReplyDialog({ open, onOpenChange, postData }: ReplyDialogProps) {
           {/* <Separator className="bg-muted-foreground" /> */}
           <div className="flex items-start gap-2">
             <Image
-              src={postData.user.image || avatarPlaceholder}
+              src={data.user.image || avatarPlaceholder}
               alt="User Profile"
               width={50}
               height={50}
